@@ -15,12 +15,6 @@ import sessionRoutes from "./routes/SessionRoute";
 import authenticate from "./middleware/authenticate";
 import MyUserRoutes from "./routes/MyUserRoute"; // Import MyUserRoutes
 import UserRoutes from "./routes/UserRoute"; // Import UserRoutes
-import MyProductRoute from "./routes/MyProductRoute";
-import ProductRouter from "./routes/ProductRoute";
-import MyLandRoute from "./routes/MyLandRoute";
-import LandRoutes from "./routes/LandRoute";
-import MyEquipmentRoute from "./routes/MyEquipmentRoute";
-import EquipmentRouter from "./routes/EquipmentRoute";
 
 const app = express();
 const prisma = new PrismaClient();
@@ -56,18 +50,12 @@ app.get("/", (req, res, next) => {
 // protected routes
 app.use("/sessions", authenticate, sessionRoutes);
 app.use("/myuser", authenticate, MyUserRoutes); // Protected user routes (requires authentication)
-app.use("/myproduct", authenticate, MyProductRoute); // Protected user routes (requires authentication)
-app.use("/myland", authenticate, MyLandRoute); // Protected user routes (requires authentication)
-app.use("/myequipment", authenticate, MyEquipmentRoute); // Protected user routes (requires authentication)
 
 // auth routes
 app.use("/auth", AuthRoutes);
 
 // public routes
 app.use("/user", UserRoutes); // Public user routes
-app.use("/products", ProductRouter); // Public user routes
-app.use("/lands", LandRoutes);
-app.use("/equipment", EquipmentRouter);
 
 // error handler
 app.use(errorHandler);

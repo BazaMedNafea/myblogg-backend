@@ -31,7 +31,7 @@ import {
   signToken,
   verifyToken,
 } from "../utils/jwt";
-import { sendMail } from "../utils/sendMail";
+
 import catchErrors from "../utils/catchErrors";
 import {
   emailSchema,
@@ -79,15 +79,6 @@ export const registerHandler = catchErrors(async (req, res) => {
       expiresAt: oneYearFromNow(),
     },
   });
-
-  const url = `${APP_ORIGIN}/email/verify/${verificationCode.verificationCodeId}`;
-
-  // send verification email
-  const { error } = await sendMail({
-    to: user.email,
-    ...getVerifyEmailTemplate(url),
-  });
-  if (error) console.error(error);
 
   // create session
   const session = await prisma.session.create({
@@ -295,16 +286,6 @@ export const sendPasswordResetHandler = catchErrors(async (req, res) => {
     verificationCode.verificationCodeId
   }&exp=${expiresAt.getTime()}`;
 
-  const { data, error } = await sendMail({
-    to: email,
-    ...getPasswordResetTemplate(url),
-  });
-
-  appAssert(
-    data?.id,
-    INTERNAL_SERVER_ERROR,
-    `${error?.name} - ${error?.message}`
-  );
   return res.status(OK).json({ message: "Password reset email sent" });
 });
 
