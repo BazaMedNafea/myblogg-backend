@@ -12,7 +12,7 @@ export const getUserPublicInfoHandler = catchErrors(async (req, res) => {
     where: { userId: req.params.userId }, // Changed from 'id' to 'userId'
     select: {
       userId: true,
-      name: true, // Changed from 'name' to 'Name'
+      fullName: true, // Changed from 'name' to 'Name'
     },
   });
 

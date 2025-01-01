@@ -30,9 +30,7 @@ export const getUserInfoHandler = catchErrors(async (req, res) => {
     select: {
       userId: true,
       email: true,
-      name: true,
-      telephone: true,
-      verified: true,
+      fullName: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -74,41 +72,12 @@ export const updateUserInfoHandler = catchErrors(async (req, res) => {
     data: updateData,
     select: {
       userId: true,
-      name: true,
-      telephone: true,
+      fullName: true,
+
       email: true,
       updatedAt: true,
     },
   });
 
   return res.status(OK).json(updatedUser);
-});
-
-export const addProductHandler = catchErrors(async (req, res) => {
-  // Validate the request body against the schema
-  const productData = addProductSchema.parse(req.body);
-
-  // Create the product and associate it with the logged-in user
-  const newProduct = await prisma.product.create({
-    data: {
-      userId: req.userId,
-      name: productData.name,
-      type: productData.type,
-      price: productData.price,
-      quantity: productData.quantity,
-      description: productData.description,
-      isAvailable: true,
-    },
-    select: {
-      productId: true,
-      name: true,
-      type: true,
-      price: true,
-      quantity: true,
-      description: true,
-      createdAt: true,
-    },
-  });
-
-  return res.status(201).json(newProduct); // Change status code to 201
 });

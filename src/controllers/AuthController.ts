@@ -68,15 +68,7 @@ export const registerHandler = catchErrors(async (req, res) => {
     data: {
       email: request.email,
       password: hashedPassword,
-      name: request.name,
-      telephone: request.telephone,
-    },
-  });
-  const verificationCode = await prisma.verificationCode.create({
-    data: {
-      userId: user.userId,
-      type: VerificationCodeType.EmailVerification,
-      expiresAt: oneYearFromNow(),
+      fullName: request.name,
     },
   });
 
@@ -103,9 +95,7 @@ export const registerHandler = catchErrors(async (req, res) => {
     .json({
       userId: user.userId,
       email: user.email,
-      name: user.name,
-      telephone: user.telephone,
-      verified: user.verified,
+      name: user.fullName,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -221,107 +211,4 @@ export const refreshHandler = catchErrors(async (req, res) => {
     .status(OK)
     .cookie("accessToken", accessToken, getAccessTokenCookieOptions())
     .json({ message: "Access token refreshed" });
-});
-
-export const verifyEmailHandler = catchErrors(async (req, res) => {
-  const verificationCode = verificationCodeSchema.parse(req.params.code);
-
-  const validCode = await prisma.verificationCode.findUnique({
-    where: {
-      verificationCodeId: verificationCode,
-      type: VerificationCodeType.EmailVerification,
-    },
-    include: { user: true },
-  });
-
-  appAssert(
-    validCode && validCode.expiresAt > new Date(),
-    NOT_FOUND,
-    "Invalid or expired verification code"
-  );
-
-  const updatedUser = await prisma.user.update({
-    where: { userId: validCode.userId },
-    data: { verified: true },
-  });
-
-  await prisma.verificationCode.delete({
-    where: { verificationCodeId: verificationCode },
-  });
-
-  return res.status(OK).json({ message: "Email was successfully verified" });
-});
-
-export const sendPasswordResetHandler = catchErrors(async (req, res) => {
-  const email = emailSchema.parse(req.body.email);
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  appAssert(user, NOT_FOUND, "User not found");
-
-  // check for max password reset requests (2 emails in 5min)
-  const fiveMinAgo = fiveMinutesAgo();
-  const count = await prisma.verificationCode.count({
-    where: {
-      userId: user.userId,
-      type: VerificationCodeType.PasswordReset,
-      createdAt: { gt: fiveMinAgo },
-    },
-  });
-  appAssert(
-    count <= 1,
-    TOO_MANY_REQUESTS,
-    "Too many requests, please try again later"
-  );
-
-  const expiresAt = oneHourFromNow();
-  const verificationCode = await prisma.verificationCode.create({
-    data: {
-      userId: user.userId,
-      type: VerificationCodeType.PasswordReset,
-      expiresAt,
-    },
-  });
-
-  const url = `${APP_ORIGIN}/password/reset?code=${
-    verificationCode.verificationCodeId
-  }&exp=${expiresAt.getTime()}`;
-
-  return res.status(OK).json({ message: "Password reset email sent" });
-});
-
-export const resetPasswordHandler = catchErrors(async (req, res) => {
-  const request = resetPasswordSchema.parse(req.body);
-
-  const validCode = await prisma.verificationCode.findUnique({
-    where: {
-      verificationCodeId: request.verificationCode,
-      type: VerificationCodeType.PasswordReset,
-    },
-  });
-
-  appAssert(
-    validCode && validCode.expiresAt > new Date(),
-    NOT_FOUND,
-    "Invalid or expired verification code"
-  );
-
-  // Hash the new password before updating
-  const hashedPassword = await hashValue(request.password);
-  const updatedUser = await prisma.user.update({
-    where: { userId: validCode.userId },
-    data: { password: hashedPassword },
-  });
-
-  // Delete all sessions for this user
-  await prisma.session.deleteMany({
-    where: { userId: validCode.userId },
-  });
-
-  await prisma.verificationCode.delete({
-    where: { verificationCodeId: request.verificationCode },
-  });
-
-  return clearAuthCookies(res)
-    .status(OK)
-    .json({ message: "Password was reset successfully" });
 });

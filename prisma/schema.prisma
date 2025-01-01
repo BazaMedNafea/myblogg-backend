@@ -7,193 +7,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum Status {
-  PENDING
-  COMPLETED
-  CANCELLED
-}
-
-enum Gender {
-  MALE
-  FEMALE
-  UNKNOWN
-}
-
-enum EquipmentCondition {
-  NEW
-  USED
-  REFURBISHED
-  DAMAGED
-}
-
 model User {
-  userId               String             @id @default(cuid())
-  email                String             @unique
-  name                 String
-  telephone            String
-  password             String
-  verified             Boolean            @default(false)
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-  sessions             Session[]
-  verificationCodes    VerificationCode[]
-  animals              Animal[]
-  equipment            Equipment[]
-  lands                Land[]
-  rawProducts          RentProduct[]
-  products             Product[]
-  ownedProducts        BoughtProduct[]    @relation("OwnerRelation")
-  boughtProducts       BoughtProduct[]    @relation("BuyerRelation")
-  ownedProductsForRent RentProduct[]      @relation("OwnerRent")
-  productRenter        RentProduct[]      @relation("ProductRenter")
-  animalSeller         BoughtAnimal[]     @relation("sellerAnimal")
-  animalBuyer          BoughtAnimal[]     @relation("buyerAnimal")
-  equipmentRenter      EquipmentRent[]    @relation("EquipmentRenter")
-  equipmentOwner       EquipmentRent[]    @relation("EquipmentOwner")
-  landRent             RentLand[]         @relation("landRent")
-  ownerLand            RentLand[]         @relation("OwnerLand")
-  seedlings            Seedling[]
-}
-
-model Product {
-  productId      String          @id @default(cuid())
-  userId         String
-  user           User            @relation(fields: [userId], references: [userId])
-  name           String
-  type           String
-  price          Float
-  quantity       Int
-  description    String
-  createdAt      DateTime        @default(now())
-  isAvailable    Boolean         @default(true)
-  rawProducts    RentProduct[]
-  boughtProducts BoughtProduct[]
-}
-
-model BoughtProduct {
-  boughtProductId String   @id @default(cuid())
-  productId       String
-  product         Product  @relation(fields: [productId], references: [productId])
-  ownerId         String
-  owner           User     @relation("OwnerRelation", fields: [ownerId], references: [userId])
-  buyerId         String
-  buyer           User     @relation("BuyerRelation", fields: [buyerId], references: [userId])
-  purchaseDate    DateTime
-  quantity        Int
-  totalPrice      Float
-}
-
-model RentProduct {
-  rentProductId String   @id @default(cuid())
-  productId     String
-  product       Product  @relation(fields: [productId], references: [productId])
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [userId])
-  ownerId       String
-  owner         User     @relation("OwnerRent", fields: [ownerId], references: [userId])
-  renterId      String
-  renter        User     @relation("ProductRenter", fields: [renterId], references: [userId])
-  startDate     DateTime
-  endDate       DateTime
-  rentalPrice   Float
-  createdAt     DateTime @default(now())
-}
-
-model Animal {
-  animalId     String        @id @default(cuid())
-  userId       String
-  user         User          @relation(fields: [userId], references: [userId])
-  breed        String
-  age          Int
-  gender       Gender
-  weight       Float
-  isAvailable  Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  boughtAnimal BoughtAnimal?
-}
-
-model BoughtAnimal {
-  boughtAnimalId String   @id @default(cuid())
-  animalId       String   @unique
-  animal         Animal   @relation(fields: [animalId], references: [animalId])
-  sellerId       String
-  seller         User     @relation("sellerAnimal", fields: [sellerId], references: [userId])
-  buyerId        String
-  buyer          User     @relation("buyerAnimal", fields: [buyerId], references: [userId])
-  purchaseDate   DateTime
-  price          Float
-}
-
-model Equipment {
-  equipmentId    String             @id @default(cuid())
-  userId         String
-  user           User               @relation(fields: [userId], references: [userId])
-  name           String
-  type           String
-  condition      EquipmentCondition
-  price          Float
-  description    String
-  isAvailable    Boolean            @default(true)
-  createdAt      DateTime           @default(now())
-  equipmentRents EquipmentRent[]
-}
-
-model EquipmentRent {
-  equipmentRentId String    @id @default(cuid())
-  equipmentId     String
-  equipment       Equipment @relation(fields: [equipmentId], references: [equipmentId])
-  renterId        String
-  renter          User      @relation("EquipmentRenter", fields: [renterId], references: [userId])
-  ownerId         String
-  owner           User      @relation("EquipmentOwner", fields: [ownerId], references: [userId])
-  startDate       DateTime
-  endDate         DateTime
-  totalPrice      Float
-  status          Status
-  createdAt       DateTime  @default(now())
-}
-
-model Land {
-  landId      String     @id @default(cuid())
-  userId      String
-  user        User       @relation(fields: [userId], references: [userId])
-  location    String
-  area        Float
-  type        String
-  soilType    String
-  price       Float
-  isAvailable Boolean    @default(true)
-  description String
-  createdAt   DateTime   @default(now())
-  rentLands   RentLand[]
-}
-
-model RentLand {
-  rentLandId String   @id @default(cuid())
-  landId     String
-  land       Land     @relation(fields: [landId], references: [landId])
-  renterId   String
-  renter     User     @relation("landRent", fields: [renterId], references: [userId])
-  ownerId    String
-  owner      User     @relation("OwnerLand", fields: [ownerId], references: [userId])
-  startDate  DateTime
-  endDate    DateTime
-  totalPrice Float
-  status     Status
-  createdAt  DateTime @default(now())
-}
-
-model Seedling {
-  seedlingId    String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [userId])
-  type          String
-  age           Int
-  price         Float
-  isAvailable   Boolean  @default(true)
-  description   String
-  stockQuantity Int
-  createdAt     DateTime @default(now())
+  userId    String    @id @default(cuid())
+  email     String    @unique
+  username  String?   @unique
+  password  String
+  fullName  String
+  bio       String?
+  posts     Post[] // One-to-many relationship with Post
+  sessions  Session[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Session {
@@ -205,11 +29,31 @@ model Session {
   expiresAt DateTime
 }
 
-model VerificationCode {
-  verificationCodeId String   @id @default(cuid())
-  userId             String
-  user               User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  type               String
-  createdAt          DateTime @default(now())
-  expiresAt          DateTime
+model Post {
+  postId     Int        @id @default(autoincrement())
+  title      String
+  content    String
+  published  Boolean    @default(false)
+  author     User       @relation(fields: [authorId], references: [userId])
+  authorId   String // Change this to String
+  categories Category[] @relation("PostCategories") // Many-to-many relationship with Category
+  tags       Tag[]      @relation("PostTags") // Many-to-many relationship with Tag
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Category {
+  categoryId Int      @id @default(autoincrement())
+  name       String   @unique
+  posts      Post[]   @relation("PostCategories") // Many-to-many relationship with Post
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Tag {
+  tagId     Int      @id @default(autoincrement())
+  name      String   @unique
+  posts     Post[]   @relation("PostTags") // Many-to-many relationship with Post
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
