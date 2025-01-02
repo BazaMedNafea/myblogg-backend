@@ -46,6 +46,7 @@ import {
   getRefreshTokenCookieOptions,
   setAuthCookies,
 } from "../utils/cookies";
+import AppError from "../utils/AppError";
 
 const prisma = new PrismaClient();
 
@@ -102,14 +103,22 @@ export const registerHandler = catchErrors(async (req, res) => {
 });
 
 export const loginHandler = catchErrors(async (req, res) => {
-  const request = loginSchema.parse({
-    ...req.body,
-    userAgent: req.headers["user-agent"],
-  });
+  let request;
+  try {
+    request = loginSchema.parse({
+      ...req.body,
+      userAgent: req.headers["user-agent"],
+    });
+  } catch (error) {
+    // Handle Zod validation errors and return a generic message
+    throw new AppError(UNAUTHORIZED, "Invalid email or password");
+  }
 
   const user = await prisma.user.findUnique({
     where: { email: request.email },
   });
+
+  // Generic error message to avoid revealing whether the email exists
   appAssert(user, UNAUTHORIZED, "Invalid email or password");
 
   const isValid = await compareValue(request.password, user.password);
