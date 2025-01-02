@@ -30,18 +30,16 @@ model Session {
 }
 
 model Post {
-  postId     Int       @id @default(autoincrement())
+  postId     Int        @id @default(autoincrement())
   title      String
   content    String
-  published  Boolean   @default(false)
-  author     User      @relation(fields: [authorId], references: [userId])
-  authorId   String // Each post is authored by a single user
-  category   Category? @relation(fields: [categoryId], references: [categoryId], onDelete: SetNull)
-  categoryId Int?
-  tag        Tag?      @relation(fields: [tagId], references: [tagId], onDelete: SetNull)
-  tagId      Int?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  published  Boolean    @default(false)
+  author     User       @relation(fields: [authorId], references: [userId])
+  authorId   String
+  categories Category[] @relation("PostCategories") // Many-to-many with Category
+  tags       Tag[]      @relation("PostTags") // Many-to-many with Tag
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@map("posts")
 }
@@ -49,7 +47,7 @@ model Post {
 model Category {
   categoryId Int      @id @default(autoincrement())
   name       String   @unique
-  posts      Post[] // One-to-many with Post
+  posts      Post[]   @relation("PostCategories") // Many-to-many with Post
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -59,7 +57,7 @@ model Category {
 model Tag {
   tagId     Int      @id @default(autoincrement())
   name      String   @unique
-  posts     Post[] // One-to-many with Post
+  posts     Post[]   @relation("PostTags") // Many-to-many with Post
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

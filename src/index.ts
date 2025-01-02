@@ -15,6 +15,7 @@ import sessionRoutes from "./routes/SessionRoute";
 import authenticate from "./middleware/authenticate";
 import MyUserRoutes from "./routes/MyUserRoute"; // Import MyUserRoutes
 import UserRoutes from "./routes/UserRoute"; // Import UserRoutes
+import MyPostRoutes from "./routes/MyPostRoute";
 
 const app = express();
 const prisma = new PrismaClient();
@@ -50,6 +51,7 @@ app.get("/", (req, res, next) => {
 // protected routes
 app.use("/sessions", authenticate, sessionRoutes);
 app.use("/myuser", authenticate, MyUserRoutes); // Protected user routes (requires authentication)
+app.use("/mypost", authenticate, MyPostRoutes);
 
 // auth routes
 app.use("/auth", AuthRoutes);

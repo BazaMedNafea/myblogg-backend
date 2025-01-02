@@ -9,10 +9,10 @@ const prisma = new PrismaClient();
 
 export const getUserPublicInfoHandler = catchErrors(async (req, res) => {
   const user = await prisma.user.findUnique({
-    where: { userId: req.params.userId }, // Changed from 'id' to 'userId'
+    where: { userId: req.params.userId },
     select: {
       userId: true,
-      fullName: true, // Changed from 'name' to 'Name'
+      fullName: true,
     },
   });
 

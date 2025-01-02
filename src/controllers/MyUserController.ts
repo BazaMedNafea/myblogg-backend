@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 // Define schema for user update
 const updateUserSchema = z.object({
-  name: z.string().min(2).max(100).optional(),
+  fullName: z.string().min(2).max(100).optional(),
   telephone: z.string().optional(),
   email: z.string().email().optional(),
 });
@@ -45,12 +45,12 @@ export const updateUserInfoHandler = catchErrors(async (req, res) => {
   const request = updateUserSchema.parse(req.body);
 
   const updateData: {
-    Name?: string;
+    fullName?: string;
     telephone?: string;
     email?: string;
   } = {};
 
-  if (request.name) updateData.Name = request.name;
+  if (request.fullName) updateData.fullName = request.fullName;
   if (request.telephone) updateData.telephone = request.telephone;
   if (request.email) {
     const existingUser = await prisma.user.findUnique({
@@ -73,7 +73,6 @@ export const updateUserInfoHandler = catchErrors(async (req, res) => {
     select: {
       userId: true,
       fullName: true,
-
       email: true,
       updatedAt: true,
     },

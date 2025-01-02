@@ -55,7 +55,7 @@ export const registerHandler = catchErrors(async (req, res) => {
     userAgent: req.headers["user-agent"],
   });
 
-  // verify email is not taken
+  // Verify email is not taken
   const existingUser = await prisma.user.findUnique({
     where: { email: request.email },
   });
@@ -68,11 +68,11 @@ export const registerHandler = catchErrors(async (req, res) => {
     data: {
       email: request.email,
       password: hashedPassword,
-      fullName: request.name,
+      fullName: request.fullName, // Only 'fullName' is included
     },
   });
 
-  // create session
+  // Create session
   const session = await prisma.session.create({
     data: {
       userId: user.userId,
@@ -95,7 +95,7 @@ export const registerHandler = catchErrors(async (req, res) => {
     .json({
       userId: user.userId,
       email: user.email,
-      name: user.fullName,
+      fullName: user.fullName,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
