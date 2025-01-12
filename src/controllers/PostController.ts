@@ -173,3 +173,25 @@ export const getUserPostsHandler = catchErrors(async (req, res) => {
 
   return res.status(OK).json(posts);
 });
+
+// Get a post by ID
+export const getPostByIdHandler = catchErrors(async (req, res) => {
+  const postId = parseInt(req.params.postId);
+
+  const post = await prisma.post.findUnique({
+    where: { postId },
+    include: {
+      categories: true,
+      tags: true,
+    },
+  });
+
+  appAssert(post, NOT_FOUND, "Post not found");
+  appAssert(
+    post.authorId === req.userId,
+    BAD_REQUEST,
+    "You are not the author of this post"
+  );
+
+  return res.status(OK).json(post);
+});
