@@ -1,4 +1,4 @@
-// MyPostController.ts
+// PostController.ts
 
 import { PrismaClient } from "@prisma/client";
 import { CREATED, BAD_REQUEST, OK, NOT_FOUND } from "../constants/http";
@@ -28,14 +28,11 @@ const updatePostSchema = z.object({
 
 // Create a new post
 export const createPostHandler = catchErrors(async (req, res) => {
-  // Validate the request body
   const request = createPostSchema.parse(req.body);
 
-  // Get the userId from the authenticated user (assumed to be in req.userId)
   const userId = req.userId;
   appAssert(userId, BAD_REQUEST, "User not authenticated");
 
-  // Check if the categories exist (if provided)
   if (request.categoryIds && request.categoryIds.length > 0) {
     const categoriesExist = await prisma.category.findMany({
       where: { categoryId: { in: request.categoryIds } },
@@ -47,7 +44,6 @@ export const createPostHandler = catchErrors(async (req, res) => {
     );
   }
 
-  // Check if the tags exist (if provided)
   if (request.tagIds && request.tagIds.length > 0) {
     const tagsExist = await prisma.tag.findMany({
       where: { tagId: { in: request.tagIds } },
@@ -59,13 +55,12 @@ export const createPostHandler = catchErrors(async (req, res) => {
     );
   }
 
-  // Create the post
   const post = await prisma.post.create({
     data: {
       title: request.title,
       content: request.content,
       published: request.published,
-      authorId: userId, // Use the authenticated user's ID
+      authorId: userId,
       categories: request.categoryIds
         ? {
             connect: request.categoryIds.map((id) => ({ categoryId: id })),
@@ -91,7 +86,6 @@ export const updatePostHandler = catchErrors(async (req, res) => {
   const postId = parseInt(req.params.postId);
   const request = updatePostSchema.parse(req.body);
 
-  // Check if the post exists and belongs to the authenticated user
   const existingPost = await prisma.post.findUnique({
     where: { postId },
   });
@@ -102,7 +96,6 @@ export const updatePostHandler = catchErrors(async (req, res) => {
     "You are not the author of this post"
   );
 
-  // Check if the categories exist (if provided)
   if (request.categoryIds && request.categoryIds.length > 0) {
     const categoriesExist = await prisma.category.findMany({
       where: { categoryId: { in: request.categoryIds } },
@@ -114,7 +107,6 @@ export const updatePostHandler = catchErrors(async (req, res) => {
     );
   }
 
-  // Check if the tags exist (if provided)
   if (request.tagIds && request.tagIds.length > 0) {
     const tagsExist = await prisma.tag.findMany({
       where: { tagId: { in: request.tagIds } },
@@ -126,7 +118,6 @@ export const updatePostHandler = catchErrors(async (req, res) => {
     );
   }
 
-  // Update the post
   const updatedPost = await prisma.post.update({
     where: { postId },
     data: {
@@ -153,7 +144,6 @@ export const updatePostHandler = catchErrors(async (req, res) => {
 export const deletePostHandler = catchErrors(async (req, res) => {
   const postId = parseInt(req.params.postId);
 
-  // Check if the post exists and belongs to the authenticated user
   const existingPost = await prisma.post.findUnique({
     where: { postId },
   });
@@ -164,7 +154,6 @@ export const deletePostHandler = catchErrors(async (req, res) => {
     "You are not the author of this post"
   );
 
-  // Delete the post
   await prisma.post.delete({
     where: { postId },
   });

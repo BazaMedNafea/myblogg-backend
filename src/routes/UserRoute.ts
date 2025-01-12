@@ -1,11 +1,23 @@
-// UserRoutes.ts
+// UserRoute.ts
 
 import express from "express";
-import { getUserPublicInfoHandler } from "../controllers/UserController";
+import {
+  getUserInfoHandler,
+  updateUserInfoHandler,
+  getUserPublicInfoHandler,
+} from "../controllers/UserController";
 
-const router = express.Router();
+import authenticate from "../middleware/authenticate"; // Import the authenticate middleware
+
+const UserRoutes = express.Router();
 
 // prefix: /user
-router.get("/:userId", getUserPublicInfoHandler);
 
-export default router;
+// Public routes
+UserRoutes.get("/:userId", getUserPublicInfoHandler); // Get public user information by ID
+
+// Authenticated routes (prefixed with /my/)
+UserRoutes.get("/my/info", authenticate, getUserInfoHandler); // Get authenticated user's info
+UserRoutes.put("/my/update", authenticate, updateUserInfoHandler); // Update authenticated user's info
+
+export default UserRoutes;

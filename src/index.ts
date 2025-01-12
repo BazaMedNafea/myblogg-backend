@@ -13,14 +13,15 @@ import { OK } from "./constants/http";
 import AuthRoutes from "./routes/AuthRoute";
 import sessionRoutes from "./routes/SessionRoute";
 import authenticate from "./middleware/authenticate";
-import MyUserRoutes from "./routes/MyUserRoute"; // Import MyUserRoutes
-import UserRoutes from "./routes/UserRoute"; // Import UserRoutes
-import MyPostRoutes from "./routes/MyPostRoute";
+import UserRoutes from "./routes/UserRoute";
+import PostRoutes from "./routes/PostRoute"; // Updated import
+import CategoryRoutes from "./routes/CategoryRoute";
+import TagRoutes from "./routes/TagRoute";
 
 const app = express();
 const prisma = new PrismaClient();
 
-// add middleware
+// Add middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -48,18 +49,19 @@ app.get("/", (req, res, next) => {
   });
 });
 
-// protected routes
+// Protected routes
 app.use("/sessions", authenticate, sessionRoutes);
-app.use("/myuser", authenticate, MyUserRoutes); // Protected user routes (requires authentication)
-app.use("/mypost", authenticate, MyPostRoutes);
+app.use("/post", authenticate, PostRoutes); // Updated to use /post
 
-// auth routes
+// Auth routes
 app.use("/auth", AuthRoutes);
 
-// public routes
-app.use("/user", UserRoutes); // Public user routes
+// Public routes
+app.use("/user", UserRoutes);
+app.use("/categories", CategoryRoutes);
+app.use("/tags", TagRoutes);
 
-// error handler
+// Error handler
 app.use(errorHandler);
 
 // Start the server
